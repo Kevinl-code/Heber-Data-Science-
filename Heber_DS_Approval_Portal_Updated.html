@@ -1,0 +1,660 @@
+﻿Here is the dynamic, interactive web app for the Heber Data Science Community Approval & Endorsement Portal.
+This portal acts as a digital approval system for your ideathons, challenges, and symposium events. It allows contributors (Aravind, Thirupugazh, Rajakumar Azariah, Nirmal, Joel, Divya Sri, Dharani, and Binisha) to view event details, read embedded ideation PDFs/descriptions, provide feedback, and digitally sign approval forms without needing printed paper.
+Key Capabilities Included:
+1. Dynamic Challenge & Event Manager: Edit event title, description, time range, and upload PDF ideation summaries dynamically.
+2. Role-Based Navigation (No Login Friction for Contributors):
+   * Contributor Portal: Instant access to read the proposal, submit digital signatures, and provide feedback/suggestions.
+   * Admin Portal (Tech Head Password Protected): Secure administrative hub to edit event details, manage signatures, view real-time feedback, and export CSV audit logs.
+3. Pre-configured Key Stakeholders: Dedicated digital signature slots for core contributors and mutual beneficiary reviewers.
+4. Interactive Digital Signature Pad: Enables smooth mouse/touch digital signatures directly on desktop and mobile devices.
+5. Auto-Saving & Record Exporting: Automatically saves signature records locally and allows downloading formatted endorsement records (CSV) for official college archives.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Heber Data Science - Approval & Endorsement Portal</title>
+   <script src="https://cdn.tailwindcss.com"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <style>
+       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+       body { font-family: 'Inter', sans-serif; }
+       .canvas-container { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; }
+       canvas { touch-action: none; cursor: crosshair; }
+   </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+   <!-- TOP NAVIGATION HEADER -->
+   <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+           <div class="flex items-center space-x-3">
+               <div class="bg-blue-600 p-2 rounded-lg text-white font-bold text-lg">HDS</div>
+               <div>
+                   <h1 class="text-base font-bold leading-tight">Heber Data Science</h1>
+                   <p class="text-xs text-slate-400">Digital Approval & Endorsement Portal</p>
+               </div>
+           </div>
+
+           <!-- Role View Selector -->
+           <div class="flex items-center space-x-2 bg-slate-800 p-1 rounded-xl border border-slate-700">
+               <button id="nav-contributor" onclick="switchRole('contributor')" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-blue-600 text-white shadow">
+                   <i class="fa-solid fa-pen-nib mr-1.5"></i> Contributor Portal
+               </button>
+               <button id="nav-admin" onclick="switchRole('admin')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-all">
+                   <i class="fa-solid fa-user-shield mr-1.5"></i> Tech Head (Admin)
+               </button>
+           </div>
+       </div>
+   </header>
+
+   <!-- EVENT BANNER -->
+   <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white py-6 border-b border-slate-800">
+       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+           <div>
+               <div class="inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-500/30 mb-2">
+                   <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                   <span id="display-event-status">Active Approval Window</span>
+               </div>
+               <h2 id="display-event-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Challenge #1: Context-Aware Intent Reasoning</h2>
+               <p id="display-event-timeline" class="text-slate-300 text-sm mt-1">
+                   <i class="fa-regular fa-calendar mr-1.5"></i> Timeline: <span class="font-medium text-white">Oct 2026 - Oct 2026</span> | <i class="fa-solid fa-layer-group ml-3 mr-1.5"></i> Scope: <span class="font-medium text-white">Vibe Code Sprint / Ideathon</span>
+               </p>
+           </div>
+           <div class="flex items-center space-x-3">
+               <button onclick="scrollToSection('ideation-doc')" class="bg-white/10 hover:bg-white/20 text-white text-xs px-4 py-2 rounded-lg font-medium border border-white/20 backdrop-blur transition">
+                   <i class="fa-solid fa-file-pdf mr-1.5 text-red-400"></i> Read Ideation Doc
+               </button>
+               <button onclick="scrollToSection('sign-section')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow-lg shadow-blue-600/30 transition">
+                   <i class="fa-solid fa-file-signature mr-1.5"></i> Sign Form
+               </button>
+           </div>
+       </div>
+   </div>
+
+   <!-- MAIN CONTENT CONTAINER -->
+   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+       <!-- 1. IDEATION PROPOSAL & PDF VIEWER SECTION -->
+       <section id="ideation-doc" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+           <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+               <div>
+                   <h3 class="text-lg font-bold text-slate-900 flex items-center">
+                       <i class="fa-solid fa-lightbulb text-amber-500 mr-2.5"></i> Proposal & Ideation Summary
+                   </h3>
+                   <p class="text-xs text-slate-500 mt-0.5">Review the concept proposal details prior to providing feedback and digital endorsement.</p>
+               </div>
+               <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">Ref: Heber DS / Project Incognito</span>
+           </div>
+           <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+               <!-- Proposal Abstract Text -->
+               <div class="lg:col-span-2 space-y-4">
+                   <div id="display-event-description" class="prose text-sm text-slate-600 space-y-3 leading-relaxed">
+                       <p><strong>Objective:</strong> Shift traditional AI chess evaluation away from binary right/wrong move judgments and towards context-aware strategic intent reasoning using accumulated temporal evidence (e.g., LIF / EMA sequential logic) paired with LLM coaching feedback.</p>
+                       <p><strong>Core Concept:</strong> Traditional chess engines evaluate moves purely by standard scores, ignoring player plans over time. By capturing move history vectors into an LLM prompt, the coach dynamically explains <em>why</em> a player chose a specific path based on previous moves.</p>
+                   </div>
+               </div>
+
+               <!-- Embedded PDF/Document Card -->
+               <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+                   <div>
+                       <div class="flex items-center space-x-3 mb-3">
+                           <div class="bg-red-100 text-red-600 p-2.5 rounded-lg">
+                               <i class="fa-solid fa-file-pdf text-xl"></i>
+                           </div>
+                           <div>
+                               <h4 id="pdf-doc-title" class="text-xs font-bold text-slate-800">Challenge_1_Problem_Statement.pdf</h4>
+                               <p class="text-[11px] text-slate-500">Official Problem Statement & Briefing</p>
+                           </div>
+                       </div>
+                       <p class="text-xs text-slate-500 leading-normal mb-4">
+                           Includes complete background, proposed temporal reasoning architecture, practical example scenarios, provided base components, and participant deliverables.
+                       </p>
+                   </div>
+                   <a id="pdf-download-link" href="#" onclick="return openStoredPdf();" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-medium text-center transition flex items-center justify-center">
+                       <i class="fa-solid fa-download mr-1.5"></i> Download / View Reference PDF
+                   </a>
+               </div>
+           </div>
+       </section>
+
+       <!-- 2. DIGITAL SIGNATURE STATUS BOARD -->
+       <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 mb-6">
+               <div>
+                   <h3 class="text-lg font-bold text-slate-900 flex items-center">
+                       <i class="fa-solid fa-file-contract text-blue-600 mr-2.5"></i> Contributor Approval Status
+                   </h3>
+                   <p class="text-xs text-slate-500 mt-0.5">Real-time digital endorsement status for core technical contributors and reviewers.</p>
+               </div>
+               <div class="mt-2 sm:mt-0 flex items-center space-x-2">
+                   <span id="signature-progress-badge" class="text-xs font-semibold px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
+                       Pending Signatures
+                   </span>
+               </div>
+           </div>
+
+           <!-- Core Contributors Grid -->
+           <div class="mb-6">
+               <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Core Technical Contributors</h4>
+               <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4" id="core-contributors-grid">
+                   <!-- Cards dynamic render -->
+               </div>
+           </div>
+
+           <!-- Mutual Beneficiary Contributors Grid -->
+           <div>
+               <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Mutual Beneficiary Reviewers & Contributors</h4>
+               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="beneficiary-contributors-grid">
+                   <!-- Cards dynamic render -->
+               </div>
+           </div>
+       </section>
+
+       <!-- 3. CONTRIBUTOR SIGNATURE & FEEDBACK SUBMISSION SECTION -->
+       <section id="sign-section" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+           <div class="border-b border-slate-100 pb-4 mb-6">
+               <h3 class="text-lg font-bold text-slate-900 flex items-center">
+                   <i class="fa-solid fa-signature text-indigo-600 mr-2.5"></i> Digital Sign & Feedback Form
+               </h3>
+               <p class="text-xs text-slate-500 mt-0.5">Select your name, draw your digital signature, provide any feedback or improvements, and submit.</p>
+           </div>
+
+           <form id="signature-form" onsubmit="handleSignatureSubmit(event)" class="space-y-6">
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <!-- Contributor Name Selector -->
+                   <div>
+                       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Select Your Name *</label>
+                       <select id="signatory-name" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                           <option value="" disabled selected>-- Select Contributor --</option>
+                           <optgroup label="Core Technical Team">
+                               <option value="Aravind G">Aravind G</option>
+                               <option value="Thirupugazh M">Thirupugazh M</option>
+                               <option value="Rajakumar Azariah S">Rajakumar Azariah S</option>
+                               <option value="Nirmal G">Nirmal G</option>
+                               <option value="Joel A">Joel A</option>
+                           </optgroup>
+                           <optgroup label="Mutual Beneficiary Reviewers">
+                               <option value="Divya Sri">Divya Sri</option>
+                               <option value="Dharani">Dharani</option>
+                               <option value="Binisha">Binisha</option>
+                           </optgroup>
+                       </select>
+                   </div>
+
+                   <!-- Role Badge / Designation -->
+                   <div>
+                       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contributor Category</label>
+                       <input id="signatory-category" type="text" readonly value="Auto-detected on selection" class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-500 cursor-not-allowed">
+                   </div>
+               </div>
+
+               <!-- Feedback & Suggestions Box -->
+               <div>
+                   <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Suggestions, Feedback or Improvements (Optional)</label>
+                   <textarea id="signatory-feedback" rows="3" placeholder="Share your suggestions, improvements, or feedback to refine this ideathon proposal wholeheartedly..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+               </div>
+
+               <!-- Digital Canvas Signature Pad -->
+               <div>
+                   <div class="flex justify-between items-center mb-2">
+                       <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Draw Digital Signature *</label>
+                       <button type="button" onclick="clearSignatureCanvas()" class="text-xs text-red-600 hover:text-red-700 font-medium">
+                           <i class="fa-solid fa-rotate-left mr-1"></i> Clear Canvas
+                       </button>
+                   </div>
+                   <div class="canvas-container p-2 relative">
+                       <canvas id="signature-pad" class="w-full h-40 bg-white rounded border border-slate-200"></canvas>
+                       <div id="canvas-placeholder" class="absolute inset-0 pointer-events-none flex items-center justify-center text-slate-400 text-xs font-medium">
+                           Draw your signature here using Mouse or Touch
+                       </div>
+                   </div>
+               </div>
+
+               <!-- Submit Button -->
+               <div class="flex justify-end">
+                   <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md shadow-blue-600/20 transition flex items-center">
+                       <i class="fa-solid fa-check-circle mr-2"></i> Submit Digital Approval
+                   </button>
+               </div>
+           </form>
+       </section>
+
+       <!-- 4. TECH HEAD ADMIN DASHBOARD (VISIBLE IN ADMIN MODE) -->
+       <section id="admin-dashboard" class="hidden bg-slate-900 text-white rounded-2xl shadow-xl p-6 border border-slate-800 space-y-6">
+           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4">
+               <div>
+                   <div class="inline-flex items-center space-x-2 text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">
+                       <i class="fa-solid fa-lock text-xs"></i> Admin Portal (Technical Head Controls)
+                   </div>
+                   <h3 class="text-xl font-bold">Event & Endorsement Management</h3>
+               </div>
+               <div class="mt-3 sm:mt-0 flex items-center space-x-3">
+                   <button onclick="exportSignaturesToCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded-lg font-semibold transition flex items-center shadow">
+                       <i class="fa-solid fa-file-excel mr-1.5"></i> Export CSV Audit Log
+                   </button>
+                   <button onclick="resetAllSignatures()" class="px-3.5 py-2 bg-red-600/30 hover:bg-red-600 text-red-200 hover:text-white border border-red-500/40 text-xs rounded-lg font-medium transition">
+                       Reset All Data
+                   </button>
+               </div>
+           </div>
+
+           <!-- Admin Tabs -->
+           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+               <!-- Event Configuration Editor -->
+               <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700/80 space-y-4">
+                   <h4 class="text-sm font-bold text-slate-200 flex items-center">
+                       <i class="fa-solid fa-gear text-blue-400 mr-2"></i> Configure Current Event & Ideation
+                   </h4>
+                   <div class="space-y-3">
+                       <div>
+                           <label class="block text-xs font-medium text-slate-400 mb-1">Event / Challenge Title</label>
+                           <input id="admin-input-title" type="text" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+                       </div>
+                       <div class="grid grid-cols-2 gap-3">
+                           <div>
+                               <label class="block text-xs font-medium text-slate-400 mb-1">Time Range / Dates</label>
+                               <input id="admin-input-timeline" type="text" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+                           </div>
+                           <div>
+                               <label class="block text-xs font-medium text-slate-400 mb-1">Reference Document Title</label>
+                               <input id="admin-input-pdf" type="text" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white">
+                           </div>
+                       </div>
+                       <div>
+                           <div class="bg-slate-900/70 border border-slate-700 rounded-lg p-3 space-y-2 mb-3">
+                           <label class="block text-xs font-medium text-slate-400 mb-1">Upload New PDF</label>
+                           <input id="admin-pdf-upload" type="file" accept="application/pdf" onchange="handlePdfUpload(event)" class="block w-full text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-500">
+                           <p id="admin-pdf-status" class="text-[11px] text-slate-500">No new PDF selected.</p>
+                           <a id="admin-pdf-preview" href="#" target="_blank" class="hidden text-[11px] text-blue-400 hover:text-blue-300 underline">Open currently stored PDF</a>
+                       </div>
+                       <label class="block text-xs font-medium text-slate-400 mb-1">Ideation Proposal Description</label>
+                           <textarea id="admin-input-desc" rows="3" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"></textarea>
+                       </div>
+                       <button onclick="updateEventConfig()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition">
+                           Save Event Settings
+                       </button>
+                   </div>
+               </div>
+
+               <!-- Live Feedback & Suggestions Audit Feed -->
+               <div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700/80 flex flex-col justify-between">
+                   <div>
+                       <h4 class="text-sm font-bold text-slate-200 flex items-center mb-3">
+                           <i class="fa-solid fa-comments text-amber-400 mr-2"></i> Contributor Feedback & Suggestions
+                       </h4>
+                       <div id="admin-feedback-feed" class="space-y-3 max-h-56 overflow-y-auto pr-1">
+                           <!-- Dynamic feedback items -->
+                       </div>
+                   </div>
+                   <div class="pt-3 border-t border-slate-700/60 mt-3 text-[11px] text-slate-400 flex justify-between items-center">
+                       <span>Auto-saving to Local Audit Store</span>
+                       <span id="feedback-count-badge" class="text-blue-400 font-semibold">0 Responses</span>
+                   </div>
+               </div>
+           </div>
+       </section>
+
+   </main>
+
+   <!-- FOOTER -->
+   <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
+           <div>
+               © 2026 <strong>Heber Data Science Community</strong>. Official Digital Endorsement System.
+           </div>
+           <div class="flex items-center space-x-4">
+               <span>Technical Head: <strong>Kevin Lazarus</strong></span>
+               <span>•</span>
+               <span>Open Source Initiative</span>
+           </div>
+       </div>
+   </footer>
+
+   <!-- INTERACTIVE SCRIPT LOGIC -->
+   <script>
+       // --- DATA STATE MANAGEMENT ---
+       const DEFAULT_CONTRIBUTORS = [
+           { id: 'aravind', name: 'Aravind G', role: 'Assistant Technical Head', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
+           { id: 'thirupugazh', name: 'Thirupugazh M', role: 'Executive Member', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
+           { id: 'rajakumar', name: 'Rajakumar Azariah S', role: 'Technical Contributor', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
+           { id: 'nirmal', name: 'Nirmal G', role: 'Source Contributor', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
+           { id: 'joel', name: 'Joel A', role: 'Source Contributor', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
+           { id: 'divyasri', name: 'Divya Sri', role: 'Supportive Contributor & Mutual Benefit Role', category: 'Reviewer', signed: false, date: null, feedback: '', sigData: null },
+           { id: 'dharani', name: 'Dharani', role: 'General Body & Mutual Benefit Role', category: 'Reviewer', signed: false, date: null, feedback: '', sigData: null },
+           { id: 'binisha', name: 'Binisha', role: 'Supportive Contributor & Mutual Benefit Role', category: 'Reviewer', signed: false, date: null, feedback: '', sigData: null }
+       ];
+
+       let eventState = {
+           title: "Challenge #1: Context-Aware Intent Reasoning",
+           timeline: "Oct 2026 - Oct 2026",
+           pdfDoc: "Challenge_1_Problem_Statement.pdf",
+           pdfData: "",
+           description: "Objective: Shift traditional AI chess evaluation away from binary right/wrong move judgments and towards context-aware strategic intent reasoning using accumulated temporal evidence (e.g., LIF / EMA sequential logic) paired with LLM coaching feedback."
+       };
+
+       let contributors = [...DEFAULT_CONTRIBUTORS];
+       let currentRole = 'contributor'; // 'contributor' or 'admin'
+       let isAdminUnlocked = false;
+
+       // --- CANVAS SIGNATURE PAD LOGIC ---
+       let canvas, ctx;
+       let isDrawing = false;
+       let hasDrawn = false;
+
+       window.addEventListener('DOMContentLoaded', () => {
+           initCanvas();
+           loadState();
+           renderAll();
+
+           document.getElementById('signatory-name').addEventListener('change', (e) => {
+               const selected = contributors.find(c => c.name === e.target.value);
+               if (selected) {
+                   document.getElementById('signatory-category').value = `${selected.category} (${selected.role})`;
+               }
+           });
+       });
+
+       function initCanvas() {
+           canvas = document.getElementById('signature-pad');
+           ctx = canvas.getContext('2d');
+           
+           // Handle DPI resolution
+           const rect = canvas.getBoundingClientRect();
+           canvas.width = rect.width;
+           canvas.height = rect.height;
+
+           ctx.lineWidth = 2.5;
+           ctx.lineCap = 'round';
+           ctx.strokeStyle = '#1e293b';
+
+           // Mouse Events
+           canvas.addEventListener('mousedown', startDrawing);
+           canvas.addEventListener('mousemove', draw);
+           canvas.addEventListener('mouseup', stopDrawing);
+           canvas.addEventListener('mouseleave', stopDrawing);
+
+           // Touch Events
+           canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); });
+           canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
+           canvas.addEventListener('touchend', stopDrawing);
+       }
+
+       function startDrawing(e) {
+           isDrawing = true;
+           hasDrawn = true;
+           document.getElementById('canvas-placeholder').classList.add('hidden');
+           const rect = canvas.getBoundingClientRect();
+           ctx.beginPath();
+           ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+       }
+
+       function draw(e) {
+           if (!isDrawing) return;
+           const rect = canvas.getBoundingClientRect();
+           ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+           ctx.stroke();
+       }
+
+       function stopDrawing() {
+           isDrawing = false;
+       }
+
+       function clearSignatureCanvas() {
+           ctx.clearRect(0, 0, canvas.width, canvas.height);
+           hasDrawn = false;
+           document.getElementById('canvas-placeholder').classList.remove('hidden');
+       }
+
+       // --- ROLE NAVIGATION & ADMIN UNLOCK ---
+       function switchRole(role) {
+           if (role === 'admin' && !isAdminUnlocked) {
+               const pass = prompt("Enter Tech Head Password (Default: admin123):");
+               if (pass === "admin123" || pass === "admin") {
+                   isAdminUnlocked = true;
+               } else {
+                   alert("Incorrect Password!");
+                   return;
+               }
+           }
+
+           currentRole = role;
+           const navContrib = document.getElementById('nav-contributor');
+           const navAdmin = document.getElementById('nav-admin');
+           const adminDash = document.getElementById('admin-dashboard');
+
+           if (role === 'admin') {
+               navAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-blue-600 text-white shadow";
+               navContrib.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-all";
+               adminDash.classList.remove('hidden');
+               populateAdminInputs();
+           } else {
+               navContrib.className = "px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-blue-600 text-white shadow";
+               navAdmin.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition-all";
+               adminDash.classList.add('hidden');
+           }
+       }
+
+       // --- SUBMISSION HANDLER ---
+       function handleSignatureSubmit(e) {
+           e.preventDefault();
+           const nameSelect = document.getElementById('signatory-name').value;
+           const feedbackText = document.getElementById('signatory-feedback').value.trim();
+
+           if (!nameSelect) {
+               alert("Please select your name from the list.");
+               return;
+           }
+
+           if (!hasDrawn) {
+               alert("Please draw your signature in the canvas box before submitting.");
+               return;
+           }
+
+           const target = contributors.find(c => c.name === nameSelect);
+           if (target) {
+               target.signed = true;
+               target.date = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+               target.feedback = feedbackText;
+               target.sigData = canvas.toDataURL();
+
+               saveState();
+               renderAll();
+               clearSignatureCanvas();
+               document.getElementById('signature-form').reset();
+               document.getElementById('signatory-category').value = "Auto-detected on selection";
+
+               alert(`Thank you, ${target.name}! Your approval and feedback have been digitally recorded.`);
+           }
+       }
+
+       // --- RENDER FUNCTIONS ---
+       function renderAll() {
+           // Render Header & Doc info
+           document.getElementById('display-event-title').innerText = eventState.title;
+           document.getElementById('display-event-timeline').innerHTML = `<i class="fa-regular fa-calendar mr-1.5"></i> Timeline: <span class="font-medium text-white">${eventState.timeline}</span>`;
+           document.getElementById('pdf-doc-title').innerText = eventState.pdfDoc;
+           const pdfLink = document.getElementById('pdf-download-link');
+           if (pdfLink) {
+               pdfLink.classList.toggle('opacity-50', !eventState.pdfData);
+               pdfLink.title = eventState.pdfData ? `Open ${eventState.pdfDoc}` : 'No PDF uploaded yet';
+           }
+           document.getElementById('display-event-description').innerHTML = `<p>${eventState.description}</p>`;
+
+           // Render Core Cards
+           const coreContainer = document.getElementById('core-contributors-grid');
+           const coreList = contributors.filter(c => c.category === 'Core');
+           coreContainer.innerHTML = coreList.map(c => renderContributorCard(c)).join('');
+
+           // Render Reviewer Cards
+           const revContainer = document.getElementById('beneficiary-contributors-grid');
+           const revList = contributors.filter(c => c.category === 'Reviewer');
+           revContainer.innerHTML = revList.map(c => renderContributorCard(c)).join('');
+
+           // Update Status Badge
+           const totalSigned = contributors.filter(c => c.signed).length;
+           const badge = document.getElementById('signature-progress-badge');
+           if (totalSigned === contributors.length) {
+               badge.className = "text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full";
+               badge.innerText = "All Approvals Complete (8/8)";
+           } else {
+               badge.className = "text-xs font-semibold px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full";
+               badge.innerText = `Approvals Pending (${totalSigned}/${contributors.length} Signed)`;
+           }
+
+           // Render Feedback in Admin Panel
+           renderAdminFeedbackFeed();
+       }
+
+       function renderContributorCard(c) {
+           return `
+               <div class="bg-slate-50 rounded-xl p-3.5 border ${c.signed ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200'} transition flex flex-col justify-between">
+                   <div>
+                       <div class="flex justify-between items-start mb-1.5">
+                           <span class="text-[10px] font-bold uppercase tracking-wider ${c.signed ? 'text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded' : 'text-slate-500 bg-slate-200 px-2 py-0.5 rounded'}">
+                               ${c.signed ? 'Signed' : 'Pending'}
+                           </span>
+                           <i class="fa-solid ${c.signed ? 'fa-check-circle text-emerald-600' : 'fa-clock text-amber-500'} text-sm"></i>
+                       </div>
+                       <h5 class="text-xs font-bold text-slate-800 leading-tight">${c.name}</h5>
+                       <p class="text-[11px] text-slate-500 mt-0.5">${c.role}</p>
+                   </div>
+                   
+                   <div class="mt-3 pt-2 border-t border-slate-200/60">
+                       ${c.signed ? `
+                           <div class="text-[10px] text-slate-500 space-y-1">
+                               <div><i class="fa-solid fa-calendar-check mr-1"></i> ${c.date}</div>${c.sigData ? `<img src="${c.sigData}" class="h-6 object-contain bg-white rounded border px-1 mt-1" alt="sig"/>` : ''}
+                           </div>
+                       ` : `
+                           <span class="text-[10px] text-slate-400 italic">Awaiting digital sign</span>
+                       `}
+                   </div>
+               </div>
+           `;
+       }
+
+       function renderAdminFeedbackFeed() {
+           const feed = document.getElementById('admin-feedback-feed');
+           const signedWithFeedback = contributors.filter(c => c.signed && c.feedback);
+           document.getElementById('feedback-count-badge').innerText = `${signedWithFeedback.length} Feedback Submissions`;
+
+           if (signedWithFeedback.length === 0) {
+               feed.innerHTML = `<p class="text-xs text-slate-500 italic py-4 text-center">No feedback entries recorded yet.</p>`;
+               return;
+           }
+
+           feed.innerHTML = signedWithFeedback.map(c => `
+               <div class="bg-slate-900/90 rounded-lg p-3 border border-slate-700/60 text-xs">
+                   <div class="flex justify-between items-center mb-1">
+                       <span class="font-bold text-blue-300">${c.name}</span>
+                       <span class="text-[10px] text-slate-500">${c.date}</span>
+                   </div>
+                   <p class="text-slate-300 italic">"${c.feedback}"</p>
+               </div>
+           `).join('');
+       }
+
+       // --- ADMIN FUNCTIONS ---
+       function populateAdminInputs() {
+           document.getElementById('admin-input-title').value = eventState.title;
+           document.getElementById('admin-input-timeline').value = eventState.timeline;
+           document.getElementById('admin-input-pdf').value = eventState.pdfDoc;
+           document.getElementById('admin-input-desc').value = eventState.description;
+
+           const status = document.getElementById('admin-pdf-status');
+           const preview = document.getElementById('admin-pdf-preview');
+           if (eventState.pdfData) {
+               status.innerText = `Stored PDF: ${eventState.pdfDoc}`;
+               preview.href = eventState.pdfData;
+               preview.classList.remove('hidden');
+           } else {
+               status.innerText = 'No new PDF selected.';
+               preview.classList.add('hidden');
+               preview.removeAttribute('href');
+           }
+       }
+
+       function handlePdfUpload(event) {
+           const file = event.target.files && event.target.files[0];
+           if (!file) return;
+           if (file.type !== 'application/pdf') {
+               alert('Please select a PDF file only.');
+               event.target.value = '';
+               return;
+           }
+           const reader = new FileReader();
+           reader.onload = function(e) {
+               eventState.pdfData = e.target.result;
+               eventState.pdfDoc = file.name;
+               document.getElementById('admin-input-pdf').value = file.name;
+               document.getElementById('admin-pdf-status').innerText = `Ready to save: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+               const preview = document.getElementById('admin-pdf-preview');
+               preview.href = eventState.pdfData;
+               preview.classList.remove('hidden');
+           };
+           reader.onerror = function() { alert('Could not read the selected PDF.'); };
+           reader.readAsDataURL(file);
+       }
+
+       function openStoredPdf() {
+           if (!eventState.pdfData) {
+               alert('No PDF has been uploaded yet. Please upload one from the Admin panel.');
+               return false;
+           }
+           window.open(eventState.pdfData, '_blank');
+           return false;
+       }
+
+       function updateEventConfig() {
+           eventState.title = document.getElementById('admin-input-title').value.trim();
+           eventState.timeline = document.getElementById('admin-input-timeline').value.trim();
+           eventState.pdfDoc = document.getElementById('admin-input-pdf').value.trim() || 'Reference_Document.pdf';
+           eventState.description = document.getElementById('admin-input-desc').value.trim();
+           saveState();
+           renderAll();
+           populateAdminInputs();
+           alert('Event settings and PDF reference updated successfully!');
+       }
+
+       function exportSignaturesToCSV() {
+           let csv = "Name,Category,Role,Status,Timestamp,Feedback\n";
+           contributors.forEach(c => {
+               const cleanFeedback = (c.feedback || '').replace(/"/g, '""');
+               csv += `"${c.name}","${c.category}","${c.role}","${c.signed ? 'Signed' : 'Pending'}","${c.date || 'N/A'}","${cleanFeedback}"\n`;
+           });
+
+           const blob = new Blob([csv], { type: 'text/csv' });
+           const url = window.URL.createObjectURL(blob);
+           const a = document.createElement('a');
+           a.setAttribute('href', url);
+           a.setAttribute('download', `HeberDS_Approvals_${eventState.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.csv`);
+           a.click();
+       }
+
+       function resetAllSignatures() {
+           if (confirm("Are you sure you want to clear all signatures and feedback? This action cannot be undone.")) {
+               contributors = DEFAULT_CONTRIBUTORS.map(c => ({ ...c }));
+               saveState();
+               renderAll();
+           }
+       }
+
+       // --- LOCAL STORAGE HELPERS ---
+       function saveState() {
+           localStorage.setItem('hds_event_state', JSON.stringify(eventState));
+           localStorage.setItem('hds_contributors_state', JSON.stringify(contributors));
+       }
+
+       function loadState() {
+           const savedEvent = localStorage.getItem('hds_event_state');
+           const savedContribs = localStorage.getItem('hds_contributors_state');
+           if (savedEvent) eventState = JSON.parse(savedEvent);
+           if (savedContribs) contributors = JSON.parse(savedContribs);
+       }
+
+       function scrollToSection(id) {
+           document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+       }
+   </script>
+</body>
+</html>
