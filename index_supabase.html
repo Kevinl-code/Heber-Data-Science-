@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heber Data Science - Supabase Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+body{font-family:Inter,sans-serif}
+.canvas-container{border:2px dashed #cbd5e1;border-radius:8px;background:#f8fafc}
+canvas{touch-action:none;cursor:crosshair}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+<header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="bg-blue-600 p-2 rounded-lg font-bold text-lg">HDS</div>
+<div><h1 class="text-base font-bold leading-tight">Heber Data Science</h1><p class="text-xs text-slate-400">Digital Approval & Endorsement Portal</p></div>
+</div>
+<div class="flex items-center space-x-2 bg-slate-800 p-1 rounded-xl border border-slate-700">
+<button id="nav-contributor" onclick="switchRole('contributor')" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white shadow"><i class="fa-solid fa-pen-nib mr-1.5"></i>Contributor Portal</button>
+<button id="nav-admin" onclick="switchRole('admin')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white"><i class="fa-solid fa-user-shield mr-1.5"></i>Tech Head (Admin)</button>
+</div>
+</div>
+</header>
+
+<div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white py-6 border-b border-slate-800">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<div class="inline-flex items-center space-x-2 bg-blue-500/20 text-blue-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-500/30 mb-2"><span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span><span>Active Approval Window</span></div>
+<h2 id="display-event-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Challenge #1: Context-Aware Intent Reasoning</h2>
+<p id="display-event-timeline" class="text-slate-300 text-sm mt-1"><i class="fa-regular fa-calendar mr-1.5"></i>Timeline: <span class="font-medium text-white">Oct 2026 - Oct 2026</span></p>
+</div>
+<div class="flex items-center space-x-3">
+<button onclick="scrollToSection('ideation-doc')" class="bg-white/10 hover:bg-white/20 text-white text-xs px-4 py-2 rounded-lg font-medium border border-white/20 transition"><i class="fa-solid fa-file-pdf mr-1.5 text-red-400"></i>Read Ideation Doc</button>
+<button onclick="scrollToSection('sign-section')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow-lg transition"><i class="fa-solid fa-file-signature mr-1.5"></i>Sign Form</button>
+</div>
+</div>
+</div>
+
+<main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+<section id="ideation-doc" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+<div class="p-6 border-b border-slate-100 flex justify-between items-center">
+<div><h3 class="text-lg font-bold text-slate-900 flex items-center"><i class="fa-solid fa-lightbulb text-amber-500 mr-2.5"></i>Proposal & Ideation Summary</h3><p class="text-xs text-slate-500 mt-0.5">Review the concept proposal details prior to providing feedback and digital endorsement.</p></div>
+<span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">Ref: Heber DS / Project Incognito</span>
+</div>
+<div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 text-sm text-slate-600 leading-relaxed" id="display-event-description"><p>Objective: Shift traditional AI chess evaluation away from binary right/wrong move judgments and towards context-aware strategic intent reasoning using accumulated temporal evidence paired with LLM coaching feedback.</p></div>
+<div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between">
+<div>
+<div class="flex items-center space-x-3 mb-3"><div class="bg-red-100 text-red-600 p-2.5 rounded-lg"><i class="fa-solid fa-file-pdf text-xl"></i></div><div><h4 id="pdf-doc-title" class="text-xs font-bold text-slate-800">Challenge_1_Problem_Statement.pdf</h4><p class="text-[11px] text-slate-500">Official Problem Statement & Briefing</p></div></div>
+<p class="text-xs text-slate-500 leading-normal mb-4">Includes the complete event reference document uploaded by the Technical Head.</p>
+</div>
+<a id="pdf-download-link" href="#" onclick="return openStoredPdf()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-medium text-center transition"><i class="fa-solid fa-download mr-1.5"></i>Download / View Reference PDF</a>
+</div>
+</div>
+</section>
+
+<section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+<div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-6">
+<div><h3 class="text-lg font-bold text-slate-900 flex items-center"><i class="fa-solid fa-file-contract text-blue-600 mr-2.5"></i>Contributor Approval Status</h3><p class="text-xs text-slate-500 mt-0.5">Shared approval status from Supabase.</p></div>
+<span id="signature-progress-badge" class="text-xs font-semibold px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full">Approvals Pending</span>
+</div>
+<h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Core Technical Contributors</h4>
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6" id="core-contributors-grid"></div>
+<h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Mutual Beneficiary Reviewers & Contributors</h4>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="beneficiary-contributors-grid"></div>
+</section>
+
+<section id="sign-section" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+<div class="border-b border-slate-100 pb-4 mb-6">
+<h3 class="text-lg font-bold text-slate-900 flex items-center"><i class="fa-solid fa-signature text-indigo-600 mr-2.5"></i>Digital Sign & Feedback Form</h3>
+<p class="text-xs text-slate-500 mt-0.5">Select your name, verify your date of birth, draw your digital signature and submit.</p>
+</div>
+<form id="signature-form" onsubmit="handleSignatureSubmit(event)" class="space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Select Your Name *</label>
+<select id="signatory-name" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+<option value="" disabled selected>-- Select Contributor --</option>
+<optgroup label="Core Technical Team">
+<option value="Aravind G">Aravind G</option>
+<option value="Thirupugazh M">Thirupugazh M</option>
+<option value="Rajakumar Azariah S">Rajakumar Azariah S</option>
+<option value="Nirmal G">Nirmal G</option>
+<option value="Joel A">Joel A</option>
+</optgroup>
+<optgroup label="Mutual Beneficiary Reviewers">
+<option value="Divya Sri">Divya Sri</option>
+<option value="Dharani">Dharani</option>
+<option value="Binisha">Binisha</option>
+</optgroup>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Contributor Category</label>
+<input id="signatory-category" readonly value="Auto-detected on selection" class="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-500">
+</div>
+</div>
+
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Date of Birth Verification *</label>
+<input id="signatory-dob" type="text" inputmode="numeric" maxlength="10" placeholder="DD.MM.YYYY" required autocomplete="off" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+<p class="text-[11px] text-slate-500 mt-1.5">Enter your registered date of birth to verify your identity.</p>
+<p id="dob-status" class="text-xs mt-2 hidden"></p>
+</div>
+
+<div>
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Suggestions, Feedback or Improvements (Optional)</label>
+<textarea id="signatory-feedback" rows="3" placeholder="Share your suggestions, improvements, or feedback..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+</div>
+
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Draw Digital Signature *</label>
+<button type="button" onclick="clearSignatureCanvas()" class="text-xs text-red-600 hover:text-red-700 font-medium"><i class="fa-solid fa-rotate-left mr-1"></i>Clear Canvas</button>
+</div>
+<div class="canvas-container p-2 relative">
+<canvas id="signature-pad" class="w-full h-40 bg-white rounded border border-slate-200"></canvas>
+<div id="canvas-placeholder" class="absolute inset-0 pointer-events-none flex items-center justify-center text-slate-400 text-xs font-medium">Draw your signature here using Mouse or Touch</div>
+</div>
+</div>
+
+<div class="flex justify-end">
+<button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-md transition flex items-center"><i class="fa-solid fa-check-circle mr-2"></i>Submit Digital Approval</button>
+</div>
+</form>
+</section>
+
+<section id="admin-dashboard" class="hidden bg-slate-900 text-white rounded-2xl shadow-xl p-6 border border-slate-800 space-y-6">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4">
+<div><div class="inline-flex items-center space-x-2 text-xs font-bold text-blue-400 uppercase tracking-wider mb-1"><i class="fa-solid fa-lock text-xs"></i>Admin Portal</div><h3 class="text-xl font-bold">Event & Endorsement Management</h3></div>
+<div class="mt-3 sm:mt-0 flex items-center space-x-3">
+<button onclick="exportSignaturesToCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded-lg font-semibold"><i class="fa-solid fa-file-excel mr-1.5"></i>Export CSV Audit Log</button>
+<button onclick="resetAllSignatures()" class="px-3.5 py-2 bg-red-600/30 hover:bg-red-600 text-red-200 text-xs rounded-lg font-medium">Reset All Data</button>
+</div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700/80 space-y-4">
+<h4 class="text-sm font-bold text-slate-200 flex items-center"><i class="fa-solid fa-gear text-blue-400 mr-2"></i>Configure Current Event & Ideation</h4>
+<div class="space-y-3">
+<div><label class="block text-xs font-medium text-slate-400 mb-1">Event / Challenge Title</label><input id="admin-input-title" type="text" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"></div>
+<div class="grid grid-cols-2 gap-3">
+<div><label class="block text-xs font-medium text-slate-400 mb-1">Time Range / Dates</label><input id="admin-input-timeline" type="text" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"></div>
+<div><label class="block text-xs font-medium text-slate-400 mb-1">Reference Document Title</label><input id="admin-input-pdf" type="text" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"></div>
+</div>
+<div>
+<div class="bg-slate-900/70 border border-slate-700 rounded-lg p-3 space-y-2 mb-3">
+<label class="block text-xs font-medium text-slate-400 mb-1">Upload New PDF</label>
+<input id="admin-pdf-upload" type="file" accept="application/pdf" onchange="handlePdfUpload(event)" class="block w-full text-xs text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-red-600 file:text-white">
+<p id="admin-pdf-status" class="text-[11px] text-slate-500">No new PDF selected.</p>
+<a id="admin-pdf-preview" href="#" target="_blank" class="hidden text-[11px] text-blue-400 underline">Open currently stored PDF</a>
+</div>
+<label class="block text-xs font-medium text-slate-400 mb-1">Ideation Proposal Description</label>
+<textarea id="admin-input-desc" rows="3" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white"></textarea>
+</div>
+<button onclick="updateEventConfig()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold">Save Event Settings</button>
+</div>
+</div>
+
+<div class="bg-slate-800/80 rounded-xl p-5 border border-slate-700/80 flex flex-col justify-between">
+<div>
+<h4 class="text-sm font-bold text-slate-200 flex items-center mb-3"><i class="fa-solid fa-comments text-amber-400 mr-2"></i>Contributor Feedback & Suggestions</h4>
+<div id="admin-feedback-feed" class="space-y-3 max-h-56 overflow-y-auto pr-1"></div>
+</div>
+<div class="pt-3 border-t border-slate-700/60 mt-3 text-[11px] text-slate-400 flex justify-between">
+<span>Auto-saving to Supabase</span><span id="feedback-count-badge" class="text-blue-400 font-semibold">0 Responses</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+
+<footer class="bg-white border-t border-slate-200 py-6 mt-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500">
+<div>© 2026 <strong>Heber Data Science Community</strong>. Official Digital Endorsement System.</div>
+<div>Technical Head: <strong>Kevin Lazarus</strong> • Open Source Initiative</div>
+</div>
+</footer>
+
+<script>
+/* =========================================================
+   SUPABASE CONFIGURATION
+   Replace these two values before deployment.
+========================================================= */
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const PORTAL_ID = 1;
+const STORAGE_BUCKET = "event-documents";
+
+let eventState = {
+    title: "Challenge #1: Context-Aware Intent Reasoning",
+    timeline: "Oct 2026 - Oct 2026",
+    pdfDoc: "Challenge_1_Problem_Statement.pdf",
+    pdfUrl: "",
+    description: "Objective: Shift traditional AI chess evaluation away from binary right/wrong move judgments and towards context-aware strategic intent reasoning using accumulated temporal evidence paired with LLM coaching feedback."
+};
+
+let contributors = [];
+let currentRole = "contributor";
+let isAdminUnlocked = false;
+let pendingPdfFile = null;
+let canvas, ctx, isDrawing = false, hasDrawn = false;
+
+const DEFAULT_DOB = {
+    "Aravind G": "",
+    "Thirupugazh M": "22.09.2002",
+    "Rajakumar Azariah S": "19.10.2004",
+    "Nirmal G": "09.04.2004",
+    "Joel A": "20.12.2004",
+    "Divya Sri": "10.12.2004",
+    "Dharani": "15.03.2004",
+    "Binisha": "16.04.2004"
+};
+
+window.addEventListener("DOMContentLoaded", async () => {
+    initCanvas();
+    setupNameListener();
+    setupDOBFormatting();
+    await loadState();
+    renderAll();
+    subscribeToRealtime();
+});
+
+function initCanvas() {
+    canvas = document.getElementById("signature-pad");
+    ctx = canvas.getContext("2d");
+    const resize = () => {
+        const old = canvas.toDataURL();
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#1e293b";
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    canvas.addEventListener("mousedown", startDrawing);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDrawing);
+    canvas.addEventListener("mouseleave", stopDrawing);
+    canvas.addEventListener("touchstart", e => { e.preventDefault(); startDrawing(e.touches[0]); });
+    canvas.addEventListener("touchmove", e => { e.preventDefault(); draw(e.touches[0]); });
+    canvas.addEventListener("touchend", stopDrawing);
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    hasDrawn = true;
+    document.getElementById("canvas-placeholder").classList.add("hidden");
+    const rect = canvas.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+function draw(e) {
+    if (!isDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+}
+function stopDrawing() { isDrawing = false; }
+
+function clearSignatureCanvas() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasDrawn = false;
+    document.getElementById("canvas-placeholder").classList.remove("hidden");
+}
+
+function setupNameListener() {
+    document.getElementById("signatory-name").addEventListener("change", e => {
+        const selected = contributors.find(c => c.name === e.target.value);
+        document.getElementById("signatory-dob").value = "";
+        document.getElementById("dob-status").classList.add("hidden");
+        if (selected) {
+            document.getElementById("signatory-category").value =
+                `${selected.category} (${selected.role})`;
+        }
+    });
+}
+
+function setupDOBFormatting() {
+    const input = document.getElementById("signatory-dob");
+    input.addEventListener("input", () => {
+        let value = input.value.replace(/[^\d]/g, "").slice(0, 8);
+        if (value.length >= 5) value = value.slice(0,2) + "." + value.slice(2,4) + "." + value.slice(4);
+        else if (value.length >= 3) value = value.slice(0,2) + "." + value.slice(2);
+        input.value = value;
+    });
+}
+
+function normalizeDOB(v) {
+    return String(v || "").trim().replace(/\//g, ".").replace(/-/g, ".");
+}
+function isValidDOBFormat(v) { return /^\d{2}\.\d{2}\.\d{4}$/.test(v); }
+function showDOBStatus(msg, success) {
+    const el = document.getElementById("dob-status");
+    el.textContent = msg;
+    el.classList.remove("hidden", "text-green-600", "text-red-600");
+    el.classList.add(success ? "text-green-600" : "text-red-600");
+}
+
+function switchRole(role) {
+    if (role === "admin" && !isAdminUnlocked) {
+        const pass = prompt("Enter Tech Head Password");
+        if (pass === "2003" || pass === "admin") isAdminUnlocked = true;
+        else { alert("Incorrect Password!"); return; }
+    }
+    currentRole = role;
+    const nc = document.getElementById("nav-contributor");
+    const na = document.getElementById("nav-admin");
+    const dash = document.getElementById("admin-dashboard");
+    if (role === "admin") {
+        na.className = "px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white shadow";
+        nc.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white";
+        dash.classList.remove("hidden");
+        populateAdminInputs();
+    } else {
+        nc.className = "px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white shadow";
+        na.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white";
+        dash.classList.add("hidden");
+    }
+}
+
+async function loadState() {
+    try {
+        const ev = await supabaseClient.from("portal_state").select("*").eq("id", PORTAL_ID).maybeSingle();
+        if (ev.error) throw ev.error;
+        if (ev.data) {
+            eventState = {
+                title: ev.data.title,
+                timeline: ev.data.timeline,
+                pdfDoc: ev.data.pdf_doc,
+                pdfUrl: ev.data.pdf_url || "",
+                description: ev.data.description || ""
+            };
+        }
+
+        const cr = await supabaseClient.from("contributors").select("*").order("id");
+        if (cr.error) throw cr.error;
+
+        contributors = cr.data || [];
+        if (!contributors.length) {
+            contributors = Object.keys(DEFAULT_DOB).map((name, i) => ({
+                id: ["aravind","thirupugazh","rajakumar","nirmal","joel","divyasri","dharani","binisha"][i],
+                name,
+                role: "Contributor",
+                category: i < 5 ? "Core" : "Reviewer",
+                dob: DEFAULT_DOB[name],
+                signed: false,
+                signed_at: null,
+                feedback: "",
+                sig_data: ""
+            }));
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Could not load shared portal data from Supabase.\n\n" + err.message);
+    }
+}
+
+function subscribeToRealtime() {
+    supabaseClient.channel("hds-portal-realtime")
+    .on("postgres_changes", {event:"*", schema:"public", table:"portal_state"}, async () => {
+        await loadState(); renderAll();
+        if (currentRole === "admin") populateAdminInputs();
+    })
+    .on("postgres_changes", {event:"*", schema:"public", table:"contributors"}, async () => {
+        await loadState(); renderAll();
+    })
+    .subscribe();
+}
+
+async function handleSignatureSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById("signatory-name").value;
+    const dob = normalizeDOB(document.getElementById("signatory-dob").value);
+    const feedback = document.getElementById("signatory-feedback").value.trim();
+
+    if (!name) return alert("Please select your name from the list.");
+    if (!dob || !isValidDOBFormat(dob)) {
+        showDOBStatus("Enter DOB as DD.MM.YYYY.", false);
+        return;
+    }
+    if (!hasDrawn) return alert("Please draw your signature before submitting.");
+
+    const target = contributors.find(c => c.name === name);
+    if (!target) return alert("Contributor record not found.");
+    if (target.signed) return alert(`${target.name} has already submitted a digital approval.`);
+
+    if (normalizeDOB(target.dob) !== dob) {
+        showDOBStatus("Date of birth does not match the registered record.", false);
+        alert("Identity verification failed.");
+        document.getElementById("signatory-dob").value = "";
+        return;
+    }
+
+    const signatureData = canvas.toDataURL("image/png");
+    const { error } = await supabaseClient.from("contributors")
+        .update({
+            signed: true,
+            signed_at: new Date().toISOString(),
+            feedback,
+            sig_data: signatureData,
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", target.id)
+        .eq("signed", false);
+
+    if (error) {
+        alert("Your approval could not be saved.\n\n" + error.message);
+        return;
+    }
+
+    await loadState();
+    renderAll();
+    clearSignatureCanvas();
+    document.getElementById("signature-form").reset();
+    document.getElementById("signatory-category").value = "Auto-detected on selection";
+    document.getElementById("dob-status").classList.add("hidden");
+    alert(`Identity verified successfully.\n\nThank you, ${target.name}! Your approval and feedback have been recorded.`);
+}
+
+function renderAll() {
+    document.getElementById("display-event-title").innerText = eventState.title;
+    document.getElementById("display-event-timeline").innerHTML =
+        `<i class="fa-regular fa-calendar mr-1.5"></i>Timeline: <span class="font-medium text-white">${escapeHtml(eventState.timeline)}</span>`;
+    document.getElementById("pdf-doc-title").innerText = eventState.pdfDoc;
+    document.getElementById("display-event-description").innerHTML = `<p>${escapeHtml(eventState.description)}</p>`;
+
+    document.getElementById("core-contributors-grid").innerHTML =
+        contributors.filter(c => c.category === "Core").map(renderContributorCard).join("");
+    document.getElementById("beneficiary-contributors-grid").innerHTML =
+        contributors.filter(c => c.category === "Reviewer").map(renderContributorCard).join("");
+
+    const signed = contributors.filter(c => c.signed).length;
+    const badge = document.getElementById("signature-progress-badge");
+    badge.innerText = `Approvals: ${signed}/${contributors.length} Signed`;
+    badge.className = signed === contributors.length
+        ? "text-xs font-semibold px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full"
+        : "text-xs font-semibold px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full";
+
+    renderAdminFeedbackFeed();
+}
+
+function renderContributorCard(c) {
+    return `<div class="bg-slate-50 rounded-xl p-3.5 border ${c.signed ? "border-emerald-300 bg-emerald-50/30" : "border-slate-200"} flex flex-col justify-between">
+        <div>
+            <div class="flex justify-between items-start mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider ${c.signed ? "text-emerald-700 bg-emerald-100" : "text-slate-500 bg-slate-200"} px-2 py-0.5 rounded">${c.signed ? "Signed" : "Pending"}</span>
+                <i class="fa-solid ${c.signed ? "fa-check-circle text-emerald-600" : "fa-clock text-amber-500"} text-sm"></i>
+            </div>
+            <h5 class="text-xs font-bold text-slate-800">${escapeHtml(c.name)}</h5>
+            <p class="text-[11px] text-slate-500 mt-0.5">${escapeHtml(c.role)}</p>
+        </div>
+        <div class="mt-3 pt-2 border-t border-slate-200/60">
+            ${c.signed ? `<div class="text-[10px] text-slate-500">${escapeHtml(c.signed_at ? new Date(c.signed_at).toLocaleString() : "")}${c.sig_data ? `<img src="${c.sig_data}" class="h-6 object-contain bg-white rounded border px-1 mt-1" alt="signature">` : ""}</div>` : `<span class="text-[10px] text-slate-400 italic">Awaiting digital sign</span>`}
+        </div>
+    </div>`;
+}
+
+function renderAdminFeedbackFeed() {
+    const feed = document.getElementById("admin-feedback-feed");
+    const list = contributors.filter(c => c.signed && c.feedback);
+    document.getElementById("feedback-count-badge").innerText = `${list.length} Feedback Submissions`;
+    feed.innerHTML = list.length ? list.map(c => `<div class="bg-slate-900/90 rounded-lg p-3 border border-slate-700/60 text-xs"><div class="flex justify-between items-center mb-1"><span class="font-bold text-blue-300">${escapeHtml(c.name)}</span><span class="text-[10px] text-slate-500">${c.signed_at ? new Date(c.signed_at).toLocaleString() : ""}</span></div><p class="text-slate-300 italic">"${escapeHtml(c.feedback)}"</p></div>`).join("") : `<p class="text-xs text-slate-500 italic py-4 text-center">No feedback entries recorded yet.</p>`;
+}
+
+function populateAdminInputs() {
+    document.getElementById("admin-input-title").value = eventState.title;
+    document.getElementById("admin-input-timeline").value = eventState.timeline;
+    document.getElementById("admin-input-pdf").value = eventState.pdfDoc;
+    document.getElementById("admin-input-desc").value = eventState.description;
+    const preview = document.getElementById("admin-pdf-preview");
+    const status = document.getElementById("admin-pdf-status");
+    if (eventState.pdfUrl) {
+        preview.href = eventState.pdfUrl;
+        preview.classList.remove("hidden");
+        status.innerText = `Stored PDF: ${eventState.pdfDoc}`;
+    } else {
+        preview.classList.add("hidden");
+        status.innerText = "No PDF uploaded yet.";
+    }
+}
+
+function handlePdfUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+        alert("Please select a PDF file only.");
+        e.target.value = "";
+        return;
+    }
+    pendingPdfFile = file;
+    document.getElementById("admin-input-pdf").value = file.name;
+    document.getElementById("admin-pdf-status").innerText = `Ready to upload: ${file.name}`;
+}
+
+async function uploadPdfToSupabase(file) {
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = `current/${Date.now()}_${safe}`;
+    const {data, error} = await supabaseClient.storage.from(STORAGE_BUCKET).upload(path, file, {contentType:"application/pdf", cacheControl:"3600", upsert:false});
+    if (error) throw error;
+    return supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(data.path).data.publicUrl;
+}
+
+function openStoredPdf() {
+    if (!eventState.pdfUrl) {
+        alert("No PDF has been uploaded yet.");
+        return false;
+    }
+    window.open(eventState.pdfUrl, "_blank");
+    return false;
+}
+
+async function updateEventConfig() {
+    try {
+        const title = document.getElementById("admin-input-title").value.trim();
+        const timeline = document.getElementById("admin-input-timeline").value.trim();
+        const pdfDoc = document.getElementById("admin-input-pdf").value.trim() || "Reference_Document.pdf";
+        const description = document.getElementById("admin-input-desc").value.trim();
+        if (!title) return alert("Please enter an event title.");
+
+        let pdfUrl = eventState.pdfUrl;
+        const status = document.getElementById("admin-pdf-status");
+
+        if (pendingPdfFile) {
+            status.innerText = "Uploading PDF to Supabase...";
+            pdfUrl = await uploadPdfToSupabase(pendingPdfFile);
+            pendingPdfFile = null;
+            document.getElementById("admin-pdf-upload").value = "";
+        }
+
+        const {error} = await supabaseClient.from("portal_state").update({
+            title, timeline, pdf_doc: pdfDoc, pdf_url: pdfUrl, description,
+            updated_at: new Date().toISOString()
+        }).eq("id", PORTAL_ID);
+
+        if (error) throw error;
+
+        await loadState();
+        renderAll();
+        populateAdminInputs();
+        alert("Event settings and PDF reference updated successfully!");
+    } catch (err) {
+        console.error(err);
+        alert("Could not save event settings.\n\n" + err.message);
+    }
+}
+
+function exportSignaturesToCSV() {
+    let csv = "Name,Category,Role,Status,Timestamp,Feedback\n";
+    contributors.forEach(c => {
+        csv += `"${c.name}","${c.category}","${c.role}","${c.signed ? "Signed" : "Pending"}","${c.signed_at || "N/A"}","${(c.feedback || "").replace(/"/g,'""')}"\n`;
+    });
+    const blob = new Blob([csv], {type:"text/csv"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "HeberDS_Approvals.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+async function resetAllSignatures() {
+    if (!confirm("Are you sure you want to clear all signatures and feedback?")) return;
+    const {error} = await supabaseClient.from("contributors").update({
+        signed:false, signed_at:null, feedback:"", sig_data:"", updated_at:new Date().toISOString()
+    }).neq("id","");
+    if (error) return alert("Could not reset approvals.\n\n" + error.message);
+    await loadState();
+    renderAll();
+    alert("All contributor approvals have been reset.");
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+function scrollToSection(id) {
+    document.getElementById(id)?.scrollIntoView({behavior:"smooth"});
+}
+</script>
+</body>
+</html>
