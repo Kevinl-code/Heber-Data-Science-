@@ -399,8 +399,8 @@
        // --- ROLE NAVIGATION & ADMIN UNLOCK ---
        function switchRole(role) {
            if (role === 'admin' && !isAdminUnlocked) {
-               const pass = prompt("Enter Tech Head Password (Default: admin123):");
-               if (pass === "admin123" || pass === "admin") {
+               const pass = prompt("Enter Tech Head Password ");
+               if (pass === "2003" || pass === "admin") {
                    isAdminUnlocked = true;
                } else {
                    alert("Incorrect Password!");
