@@ -171,6 +171,28 @@
                            </optgroup>
                        </select>
                    </div>
+<!-- Date of Birth Verification -->
+<div>
+    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+        Date of Birth Verification *
+    </label>
+
+    <input
+        id="signatory-dob"
+        type="text"
+        inputmode="numeric"
+        maxlength="10"
+        placeholder="DD.MM.YYYY"
+        required
+        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+    >
+
+    <p class="text-[11px] text-slate-500 mt-1.5">
+        Enter your registered date of birth to verify your identity.
+    </p>
+
+    <p id="dob-status" class="text-xs mt-2 hidden"></p>
+</div>
 
                    <!-- Role Badge / Designation -->
                    <div>
@@ -304,16 +326,103 @@
    <!-- INTERACTIVE SCRIPT LOGIC -->
    <script>
        // --- DATA STATE MANAGEMENT ---
-       const DEFAULT_CONTRIBUTORS = [
-           { id: 'aravind', name: 'Aravind G', role: 'Assistant Technical Head', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
-           { id: 'thirupugazh', name: 'Thirupugazh M', role: 'Executive Member', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
-           { id: 'rajakumar', name: 'Rajakumar Azariah S', role: 'Technical Contributor', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
-           { id: 'nirmal', name: 'Nirmal G', role: 'Source Contributor', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
-           { id: 'joel', name: 'Joel A', role: 'Source Contributor', category: 'Core', signed: false, date: null, feedback: '', sigData: null },
-           { id: 'divyasri', name: 'Divya Sri', role: 'Supportive Contributor & Mutual Benefit Role', category: 'Reviewer', signed: false, date: null, feedback: '', sigData: null },
-           { id: 'dharani', name: 'Dharani', role: 'General Body & Mutual Benefit Role', category: 'Reviewer', signed: false, date: null, feedback: '', sigData: null },
-           { id: 'binisha', name: 'Binisha', role: 'Supportive Contributor & Mutual Benefit Role', category: 'Reviewer', signed: false, date: null, feedback: '', sigData: null }
-       ];
+      const DEFAULT_CONTRIBUTORS = [
+    {
+        id: 'aravind',
+        name: 'Aravind G',
+        role: 'Assistant Technical Head',
+        category: 'Core',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: null
+    },
+
+    {
+        id: 'thirupugazh',
+        name: 'Thirupugazh M',
+        role: 'Executive Member',
+        category: 'Core',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: '22.09.2002'
+    },
+
+    {
+        id: 'rajakumar',
+        name: 'Rajakumar Azariah S',
+        role: 'Technical Contributor',
+        category: 'Core',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: '19.10.2004'
+    },
+
+    {
+        id: 'nirmal',
+        name: 'Nirmal G',
+        role: 'Source Contributor',
+        category: 'Core',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: '09.04.2004'
+    },
+
+    {
+        id: 'joel',
+        name: 'Joel A',
+        role: 'Source Contributor',
+        category: 'Core',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: '20.12.2004'
+    },
+
+    {
+        id: 'divyasri',
+        name: 'Divya Sri',
+        role: 'Supportive Contributor & Mutual Benefit Role',
+        category: 'Reviewer',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: '10.12.2004'
+    },
+
+    {
+        id: 'dharani',
+        name: 'Dharani',
+        role: 'General Body & Mutual Benefit Role',
+        category: 'Reviewer',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: '15.03.2004'
+    },
+
+    {
+        id: 'binisha',
+        name: 'Binisha',
+        role: 'Supportive Contributor & Mutual Benefit Role',
+        category: 'Reviewer',
+        signed: false,
+        date: null,
+        feedback: '',
+        sigData: null,
+        dob: '16.04.2004'
+    }
+];
 
        let eventState = {
            title: "Challenge #1: Context-Aware Intent Reasoning",
@@ -424,40 +533,153 @@
                adminDash.classList.add('hidden');
            }
        }
+// --- DOB VALIDATION ---
 
-       // --- SUBMISSION HANDLER ---
+function normalizeDOB(value) {
+    return value
+        .trim()
+        .replace(/\//g, '.')
+        .replace(/-/g, '.');
+}
+
+function isValidDOBFormat(dob) {
+    return /^\d{2}\.\d{2}\.\d{4}$/.test(dob);
+}
+
+function verifyDOB(contributor, enteredDOB) {
+    if (!contributor || !contributor.dob) {
+        return false;
+    }
+
+    const normalizedEntered = normalizeDOB(enteredDOB);
+    const normalizedRegistered = normalizeDOB(contributor.dob);
+
+    return normalizedEntered === normalizedRegistered;
+}
+
+function showDOBStatus(message, success) {
+    const status = document.getElementById('dob-status');
+
+    status.textContent = message;
+    status.classList.remove(
+        'hidden',
+        'text-green-600',
+        'text-red-600'
+    );
+
+    status.classList.add(
+        success ? 'text-green-600' : 'text-red-600'
+    );
+}
+
        function handleSignatureSubmit(e) {
-           e.preventDefault();
-           const nameSelect = document.getElementById('signatory-name').value;
-           const feedbackText = document.getElementById('signatory-feedback').value.trim();
+    e.preventDefault();
 
-           if (!nameSelect) {
-               alert("Please select your name from the list.");
-               return;
-           }
+    const nameSelect = document.getElementById('signatory-name').value;
+    const dobInput = document.getElementById('signatory-dob');
+    const enteredDOB = dobInput.value.trim();
+    const feedbackText =
+        document.getElementById('signatory-feedback').value.trim();
 
-           if (!hasDrawn) {
-               alert("Please draw your signature in the canvas box before submitting.");
-               return;
-           }
+    // 1. Name validation
+    if (!nameSelect) {
+        alert("Please select your name from the list.");
+        return;
+    }
 
-           const target = contributors.find(c => c.name === nameSelect);
-           if (target) {
-               target.signed = true;
-               target.date = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-               target.feedback = feedbackText;
-               target.sigData = canvas.toDataURL();
+    // 2. DOB required
+    if (!enteredDOB) {
+        showDOBStatus("Date of birth is required.", false);
+        dobInput.focus();
+        return;
+    }
 
-               saveState();
-               renderAll();
-               clearSignatureCanvas();
-               document.getElementById('signature-form').reset();
-               document.getElementById('signatory-category').value = "Auto-detected on selection";
+    // 3. DOB format validation
+    const normalizedDOB = normalizeDOB(enteredDOB);
 
-               alert(`Thank you, ${target.name}! Your approval and feedback have been digitally recorded.`);
-           }
-       }
+    if (!isValidDOBFormat(normalizedDOB)) {
+        showDOBStatus(
+            "Invalid format. Please enter DOB as DD.MM.YYYY.",
+            false
+        );
+        dobInput.focus();
+        return;
+    }
 
+    // 4. Find contributor
+    const target = contributors.find(
+        c => c.name === nameSelect
+    );
+
+    if (!target) {
+        alert("Contributor record not found.");
+        return;
+    }
+
+    // 5. DOB verification
+    if (!verifyDOB(target, normalizedDOB)) {
+        showDOBStatus(
+            "Date of birth does not match the registered record.",
+            false
+        );
+
+        alert(
+            "Identity verification failed.\n\n" +
+            "The date of birth entered does not match the selected contributor."
+        );
+
+        dobInput.value = "";
+        dobInput.focus();
+
+        return;
+    }
+
+    // 6. Signature validation
+    if (!hasDrawn) {
+        alert(
+            "Identity verified successfully.\n\n" +
+            "Please draw your signature in the canvas before submitting."
+        );
+        return;
+    }
+
+    // 7. Prevent duplicate signing
+    if (target.signed) {
+        alert(
+            `${target.name} has already submitted a digital approval.`
+        );
+        return;
+    }
+
+    // 8. Record verified signature
+    target.signed = true;
+
+    target.date = new Date().toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    });
+
+    target.feedback = feedbackText;
+    target.sigData = canvas.toDataURL();
+
+    saveState();
+    renderAll();
+
+    // 9. Reset form
+    clearSignatureCanvas();
+
+    document.getElementById('signature-form').reset();
+
+    document.getElementById('signatory-category').value =
+        "Auto-detected on selection";
+
+    document.getElementById('dob-status').classList.add('hidden');
+
+    alert(
+        `Identity verified successfully.\n\n` +
+        `Thank you, ${target.name}! Your approval and feedback have been digitally recorded.`
+    );
+}
        // --- RENDER FUNCTIONS ---
        function renderAll() {
            // Render Header & Doc info
